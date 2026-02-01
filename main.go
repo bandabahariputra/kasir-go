@@ -24,6 +24,10 @@ func main() {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
+	// explicitly bind environment variables
+	viper.BindEnv("PORT")
+	viper.BindEnv("DB_CONN")
+
 	if _, err := os.Stat(".env"); err == nil {
 		viper.SetConfigFile(".env")
 		_ = viper.ReadInConfig()
