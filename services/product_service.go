@@ -6,29 +6,40 @@ import (
 )
 
 type ProductService struct {
-	repo *repositories.ProductRepository
+	productRepo  *repositories.ProductRepository
+	categoryRepo *repositories.CategoryRepository
 }
 
-func NewProductService(repo *repositories.ProductRepository) *ProductService {
-	return &ProductService{repo: repo}
+func NewProductService(productRepo *repositories.ProductRepository, categoryRepo *repositories.CategoryRepository) *ProductService {
+	return &ProductService{productRepo: productRepo, categoryRepo: categoryRepo}
 }
 
-func (s *ProductService) GetAll() ([]models.Product, error) {
-	return s.repo.FindAll()
+func (s *ProductService) GetAll() ([]models.ProductResponse, error) {
+	return s.productRepo.FindAll()
 }
 
 func (s *ProductService) Create(data *models.Product) error {
-	return s.repo.Create(data)
+	_, err := s.categoryRepo.FindById(data.CategoryID)
+	if err != nil {
+		return err
+	}
+
+	return s.productRepo.Create(data)
 }
 
-func (s *ProductService) GetById(id int) (*models.Product, error) {
-	return s.repo.FindById(id)
+func (s *ProductService) GetById(id int) (*models.ProductDetailResponse, error) {
+	return s.productRepo.FindById(id)
 }
 
 func (s *ProductService) Update(product *models.Product) error {
-	return s.repo.Update(product)
+	_, err := s.categoryRepo.FindById(product.CategoryID)
+	if err != nil {
+		return err
+	}
+
+	return s.productRepo.Update(product)
 }
 
 func (s *ProductService) Delete(id int) error {
-	return s.repo.Delete(id)
+	return s.productRepo.Delete(id)
 }

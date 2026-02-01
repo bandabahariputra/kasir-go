@@ -59,6 +59,11 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if product.CategoryID == 0 {
+		http.Error(w, "Category id is required", http.StatusBadRequest)
+		return
+	}
+
 	err = h.service.Create(&product)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
