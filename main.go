@@ -38,6 +38,10 @@ func main() {
 		DBConn: viper.GetString("DB_CONN"),
 	}
 
+	// debug
+	log.Println("PORT =", config.Port)
+	log.Println("DB_CONN =", config.DBConn)
+
 	// setup database
 	db, err := database.InitDB(config.DBConn)
 	if err != nil {
