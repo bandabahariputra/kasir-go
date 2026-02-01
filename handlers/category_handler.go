@@ -153,7 +153,7 @@ func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.Delete(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
