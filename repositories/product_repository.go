@@ -109,3 +109,25 @@ func (repo *ProductRepository) Delete(id int) error {
 
 	return err
 }
+
+func (repo *ProductRepository) FindByCategoryId(categoryId int) ([]models.ProductResponse, error) {
+	query := "SELECT id, name, price, stock FROM products where category_id = $1"
+
+	rows, err := repo.db.Query(query, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	products := make([]models.ProductResponse, 0)
+	for rows.Next() {
+		var p models.ProductResponse
+		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	return products, nil
+}

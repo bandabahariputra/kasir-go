@@ -16,6 +16,7 @@ func NewCategoryRepository(db *sql.DB) *CategoryRepository {
 
 func (repo *CategoryRepository) FindAll() ([]models.Category, error) {
 	query := "SELECT id, name, description FROM categories"
+
 	rows, err := repo.db.Query(query)
 	if err != nil {
 		return nil, err

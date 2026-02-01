@@ -49,18 +49,15 @@ func main() {
 	}
 	defer db.Close()
 
-	// Category
 	categoryRepo := repositories.NewCategoryRepository(db)
-	categoryService := services.NewCategoryService(categoryRepo)
+	productRepo := repositories.NewProductRepository(db)
+	categoryService := services.NewCategoryService(categoryRepo, productRepo)
+	productService := services.NewProductService(productRepo, categoryRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	productHandler := handlers.NewProductHandler(productService)
 
 	http.HandleFunc("/api/categories/", categoryHandler.HandleCategoryByID)
 	http.HandleFunc("/api/categories", categoryHandler.HandleCategories)
-
-	// Product
-	productRepo := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepo, categoryRepo)
-	productHandler := handlers.NewProductHandler(productService)
 
 	http.HandleFunc("/api/products/", productHandler.HandleProductByID)
 	http.HandleFunc("/api/products", productHandler.HandleProducts)
