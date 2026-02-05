@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"kasir-go/models"
+	"time"
 )
 
 type TransactionRepository struct {
@@ -84,4 +85,47 @@ func (repo *TransactionRepository) CreateTransaction(items []models.CheckoutItem
 	}
 
 	return res, nil
+}
+
+func (r *TransactionRepository) GetSummaryByPeriod(start, end time.Time) (totalRevenue int, totalTransaction int, err error) {
+	query := `
+		SELECT
+			COALESCE(SUM(total_amount), 0) AS total_revenue,
+			COUNT(*) AS total_transaction
+		FROM transactions
+		WHERE created_at >= $1 AND created_at < $2
+	`
+
+	err = r.db.QueryRow(query, start, end).Scan(&totalRevenue, &totalTransaction)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return totalRevenue, totalTransaction, nil
+}
+
+func (r *TransactionRepository) GetBestSellingProductByPeriod(start, end time.Time) (name string, quantity int, err error) {
+	query := `
+		SELECT
+			p.name,
+			SUM(td.quantity) AS qty
+		FROM transaction_details td
+		JOIN transactions t ON td.transaction_id = t.id
+		JOIN products p ON td.product_id = p.id
+		WHERE t.created_at >= $1 AND t.created_at < $2
+		GROUP BY p.name
+		ORDER BY qty DESC
+		LIMIT 1
+	`
+
+	err = r.db.QueryRow(query, start, end).Scan(&name, &quantity)
+	if err == sql.ErrNoRows {
+		return "", 0, nil
+	}
+
+	if err != nil {
+		return "", 0, err
+	}
+
+	return name, quantity, nil
 }
