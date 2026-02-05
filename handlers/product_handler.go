@@ -24,11 +24,11 @@ func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) 
 	case http.MethodPost:
 		h.Create(w, r)
 	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-// GET http://localhost:8080/api/product
+// GET http://localhost:8080/api/products
 func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	products, err := h.service.GetAll()
 	if err != nil {
@@ -40,27 +40,33 @@ func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(products)
 }
 
-// POST http://localhost:8080/api/product
+// POST http://localhost:8080/api/products
 func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
+
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if product.Name == "" {
-		http.Error(w, "Name is required", http.StatusBadRequest)
+		http.Error(w, "name is required", http.StatusBadRequest)
 		return
 	}
 
-	if product.Price <= 0 || product.Stock <= 0 {
-		http.Error(w, "Price and Stock are required", http.StatusBadRequest)
+	if product.Price <= 0 {
+		http.Error(w, "price is required", http.StatusBadRequest)
+		return
+	}
+
+	if product.Stock <= 0 {
+		http.Error(w, "stock are required", http.StatusBadRequest)
 		return
 	}
 
 	if product.CategoryID == 0 {
-		http.Error(w, "Category id is required", http.StatusBadRequest)
+		http.Error(w, "category id is required", http.StatusBadRequest)
 		return
 	}
 
@@ -84,7 +90,7 @@ func (h *ProductHandler) HandleProductByID(w http.ResponseWriter, r *http.Reques
 	case http.MethodDelete:
 		h.Delete(w, r)
 	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -95,7 +101,7 @@ func (h *ProductHandler) GetById(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
-		http.Error(w, "Invalid product id", http.StatusBadRequest)
+		http.Error(w, "invalid product id", http.StatusBadRequest)
 		return
 	}
 
@@ -116,24 +122,34 @@ func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
-		http.Error(w, "Invalid product id", http.StatusBadRequest)
+		http.Error(w, "invalid product id", http.StatusBadRequest)
 		return
 	}
 
 	var product models.Product
 	err = json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if product.Name == "" {
-		http.Error(w, "Name is required", http.StatusBadRequest)
+		http.Error(w, "name is required", http.StatusBadRequest)
 		return
 	}
 
-	if product.Price <= 0 || product.Stock <= 0 {
-		http.Error(w, "Price and Stock are required", http.StatusBadRequest)
+	if product.Price <= 0 {
+		http.Error(w, "price is required", http.StatusBadRequest)
+		return
+	}
+
+	if product.Stock <= 0 {
+		http.Error(w, "stock are required", http.StatusBadRequest)
+		return
+	}
+
+	if product.CategoryID == 0 {
+		http.Error(w, "category id is required", http.StatusBadRequest)
 		return
 	}
 
@@ -155,7 +171,7 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
-		http.Error(w, "Invalid product id", http.StatusBadRequest)
+		http.Error(w, "invalid product id", http.StatusBadRequest)
 		return
 	}
 

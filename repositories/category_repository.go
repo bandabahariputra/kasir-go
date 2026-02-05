@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"kasir-go/models"
 )
 
@@ -15,7 +16,7 @@ func NewCategoryRepository(db *sql.DB) *CategoryRepository {
 }
 
 func (repo *CategoryRepository) FindAll() ([]models.Category, error) {
-	query := "SELECT id, name, description FROM categories"
+	query := "SELECT id, name, description FROM categories ORDER BY name ASC"
 
 	rows, err := repo.db.Query(query)
 	if err != nil {
@@ -25,12 +26,12 @@ func (repo *CategoryRepository) FindAll() ([]models.Category, error) {
 
 	categories := make([]models.Category, 0)
 	for rows.Next() {
-		var c models.Category
-		err := rows.Scan(&c.ID, &c.Name, &c.Description)
+		var category models.Category
+		err := rows.Scan(&category.ID, &category.Name, &category.Description)
 		if err != nil {
 			return nil, err
 		}
-		categories = append(categories, c)
+		categories = append(categories, category)
 	}
 
 	return categories, nil
@@ -40,23 +41,24 @@ func (repo *CategoryRepository) Create(category *models.Category) error {
 	query := "INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING id"
 
 	err := repo.db.QueryRow(query, category.Name, category.Description).Scan(&category.ID)
+
 	return err
 }
 
 func (repo *CategoryRepository) FindById(id int) (*models.Category, error) {
 	query := "SELECT id, name, description FROM categories WHERE id = $1"
 
-	var c models.Category
-	err := repo.db.QueryRow(query, id).Scan(&c.ID, &c.Name, &c.Description)
-	if err == sql.ErrNoRows {
-		return nil, errors.New("Category not found")
+	var category models.Category
+	err := repo.db.QueryRow(query, id).Scan(&category.ID, &category.Name, &category.Description)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("category id %d not found", id)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &c, nil
+	return &category, nil
 }
 
 func (repo *CategoryRepository) Update(category *models.Category) error {
@@ -73,7 +75,7 @@ func (repo *CategoryRepository) Update(category *models.Category) error {
 	}
 
 	if rows == 0 {
-		return errors.New("Category not found")
+		return fmt.Errorf("category not found")
 	}
 
 	return nil
@@ -93,7 +95,7 @@ func (repo *CategoryRepository) Delete(id int) error {
 	}
 
 	if rows == 0 {
-		return errors.New("Category not found")
+		return fmt.Errorf("category not found")
 	}
 
 	return nil

@@ -9,21 +9,14 @@ type Product struct {
 	Category   *Category `json:"category,omitempty"`
 }
 
-type ProductResponse struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Price int    `json:"price"`
-	Stock int    `json:"stock"`
-}
-
-type ProductCategoryResponse struct {
+type ProductDetailCategoryResponse struct {
 	Name string `json:"name"`
 }
 
 type ProductDetailResponse struct {
-	ID       int                      `json:"id"`
-	Name     string                   `json:"name"`
-	Price    int                      `json:"price"`
-	Stock    int                      `json:"stock"`
-	Category *ProductCategoryResponse `json:"category,omitempty"`
+	ID       int                            `json:"id"`
+	Name     string                         `json:"name"`
+	Price    int                            `json:"price"`
+	Stock    int                            `json:"stock"`
+	Category *ProductDetailCategoryResponse `json:"category,omitempty"`
 }

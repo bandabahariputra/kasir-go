@@ -24,7 +24,7 @@ func (h *CategoryHandler) HandleCategories(w http.ResponseWriter, r *http.Reques
 	case http.MethodPost:
 		h.Create(w, r)
 	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -43,19 +43,20 @@ func (h *CategoryHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 // POST http://localhost:8080/api/categories
 func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var category models.Category
+
 	err := json.NewDecoder(r.Body).Decode(&category)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if category.Name == "" {
-		http.Error(w, "Name is required", http.StatusBadRequest)
+		http.Error(w, "name is required", http.StatusBadRequest)
 		return
 	}
 
 	if category.Description == "" {
-		http.Error(w, "Description is required", http.StatusBadRequest)
+		http.Error(w, "description is required", http.StatusBadRequest)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (h *CategoryHandler) HandleCategoryByID(w http.ResponseWriter, r *http.Requ
 	case http.MethodDelete:
 		h.Delete(w, r)
 	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -89,7 +90,7 @@ func (h *CategoryHandler) GetById(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid category id", http.StatusBadRequest)
+		http.Error(w, "invalid category id", http.StatusBadRequest)
 		return
 	}
 
@@ -109,24 +110,24 @@ func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid category id", http.StatusBadRequest)
+		http.Error(w, "invalid category id", http.StatusBadRequest)
 		return
 	}
 
 	var category models.Category
 	err = json.NewDecoder(r.Body).Decode(&category)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if category.Name == "" {
-		http.Error(w, "Name is required", http.StatusBadRequest)
+		http.Error(w, "name is required", http.StatusBadRequest)
 		return
 	}
 
 	if category.Description == "" {
-		http.Error(w, "Description is required", http.StatusBadRequest)
+		http.Error(w, "description is required", http.StatusBadRequest)
 		return
 	}
 
@@ -147,7 +148,7 @@ func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid category id", http.StatusBadRequest)
+		http.Error(w, "invalid category id", http.StatusBadRequest)
 		return
 	}
 

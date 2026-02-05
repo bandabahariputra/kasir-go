@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"kasir-go/models"
 )
 
@@ -14,8 +15,8 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 	return &ProductRepository{db: db}
 }
 
-func (repo *ProductRepository) FindAll() ([]models.ProductResponse, error) {
-	query := "SELECT id, name, price, stock FROM products"
+func (repo *ProductRepository) FindAll() ([]models.Product, error) {
+	query := "SELECT id, name, price, stock, category_id FROM products ORDER BY created_at DESC"
 
 	rows, err := repo.db.Query(query)
 	if err != nil {
@@ -23,14 +24,14 @@ func (repo *ProductRepository) FindAll() ([]models.ProductResponse, error) {
 	}
 	defer rows.Close()
 
-	products := make([]models.ProductResponse, 0)
+	products := make([]models.Product, 0)
 	for rows.Next() {
-		var p models.ProductResponse
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock)
+		var product models.Product
+		err := rows.Scan(&product.ID, &product.Name, &product.Price, &product.Stock, &product.CategoryID)
 		if err != nil {
 			return nil, err
 		}
-		products = append(products, p)
+		products = append(products, product)
 	}
 
 	return products, nil
@@ -40,34 +41,24 @@ func (repo *ProductRepository) Create(product *models.Product) error {
 	query := "INSERT INTO products (name, price, stock, category_id) VALUES ($1, $2, $3, $4) RETURNING id"
 
 	err := repo.db.QueryRow(query, product.Name, product.Price, product.Stock, product.CategoryID).Scan(&product.ID)
+
 	return err
 }
 
-func (repo *ProductRepository) FindById(id int) (*models.ProductDetailResponse, error) {
-	query := `
-		SELECT p.id, p.name, p.price, p.stock, c.name as category_name
-		FROM products p
-		LEFT JOIN categories c ON p.category_id = c.id
-		WHERE p.id = $1
-	`
+func (repo *ProductRepository) FindById(id int) (*models.Product, error) {
+	query := "SELECT id, name, price, stock, category_id FROM products WHERE id = $1"
 
-	var p models.ProductDetailResponse
-	var categoryName sql.NullString
-
-	err := repo.db.QueryRow(query, id).Scan(&p.ID, &p.Name, &p.Price, &p.Stock, &categoryName)
-	if err == sql.ErrNoRows {
-		return nil, errors.New("Product not found")
+	var product models.Product
+	err := repo.db.QueryRow(query, id).Scan(&product.ID, &product.Name, &product.Price, &product.Stock, &product.CategoryID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("product id %d not found", id)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	if categoryName.Valid {
-		p.Category = &models.ProductCategoryResponse{Name: categoryName.String}
-	}
-
-	return &p, nil
+	return &product, nil
 }
 
 func (repo *ProductRepository) Update(product *models.Product) error {
@@ -84,7 +75,7 @@ func (repo *ProductRepository) Update(product *models.Product) error {
 	}
 
 	if rows == 0 {
-		return errors.New("Product not found")
+		return fmt.Errorf("product not found")
 	}
 
 	return nil
@@ -104,13 +95,13 @@ func (repo *ProductRepository) Delete(id int) error {
 	}
 
 	if rows == 0 {
-		return errors.New("Product not found")
+		return fmt.Errorf("product not found")
 	}
 
 	return err
 }
 
-func (repo *ProductRepository) FindByCategoryId(categoryId int) ([]models.ProductResponse, error) {
+func (repo *ProductRepository) FindByCategoryId(categoryId int) ([]models.Product, error) {
 	query := "SELECT id, name, price, stock FROM products where category_id = $1"
 
 	rows, err := repo.db.Query(query, categoryId)
@@ -119,14 +110,14 @@ func (repo *ProductRepository) FindByCategoryId(categoryId int) ([]models.Produc
 	}
 	defer rows.Close()
 
-	products := make([]models.ProductResponse, 0)
+	products := make([]models.Product, 0)
 	for rows.Next() {
-		var p models.ProductResponse
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock)
+		var product models.Product
+		err := rows.Scan(&product.ID, &product.Name, &product.Price, &product.Stock, &product.CategoryID)
 		if err != nil {
 			return nil, err
 		}
-		products = append(products, p)
+		products = append(products, product)
 	}
 
 	return products, nil

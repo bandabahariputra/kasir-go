@@ -1,7 +1,7 @@
 package services
 
 import (
-	"errors"
+	"fmt"
 	"kasir-go/models"
 	"kasir-go/repositories"
 )
@@ -38,7 +38,7 @@ func (s *CategoryService) Delete(id int) error {
 	}
 
 	if len(products) > 0 {
-		return errors.New("Cannot delete category: category is still used by products")
+		return fmt.Errorf("cannot delete category: category is still used by products")
 	}
 
 	return s.categoryRepo.Delete(id)
