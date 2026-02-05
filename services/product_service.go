@@ -14,8 +14,8 @@ func NewProductService(productRepo *repositories.ProductRepository, categoryRepo
 	return &ProductService{productRepo: productRepo, categoryRepo: categoryRepo}
 }
 
-func (s *ProductService) GetAll() ([]models.Product, error) {
-	return s.productRepo.FindAll()
+func (s *ProductService) GetAll(name string) ([]models.Product, error) {
+	return s.productRepo.FindAll(name)
 }
 
 func (s *ProductService) Create(data *models.Product) error {
@@ -27,7 +27,7 @@ func (s *ProductService) Create(data *models.Product) error {
 	return s.productRepo.Create(data)
 }
 
-func (s *ProductService) GetById(id int) (*models.ProductDetailResponse, error) {
+func (s *ProductService) GetById(id int) (*models.Product, error) {
 	product, err := s.productRepo.FindById(id)
 	if err != nil {
 		return nil, err
@@ -38,13 +38,12 @@ func (s *ProductService) GetById(id int) (*models.ProductDetailResponse, error) 
 		return nil, err
 	}
 
-	result := &models.ProductDetailResponse{
-		ID:    product.ID,
-		Name:  product.Name,
-		Price: product.Price,
-		Category: &models.ProductDetailCategoryResponse{
-			Name: category.Name,
-		},
+	result := &models.Product{
+		ID:           product.ID,
+		Name:         product.Name,
+		Price:        product.Price,
+		CategoryID:   category.ID,
+		CategoryName: category.Name,
 	}
 
 	return result, nil

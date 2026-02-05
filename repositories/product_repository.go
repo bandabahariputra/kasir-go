@@ -15,10 +15,18 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 	return &ProductRepository{db: db}
 }
 
-func (repo *ProductRepository) FindAll() ([]models.Product, error) {
-	query := "SELECT id, name, price, stock, category_id FROM products ORDER BY created_at DESC"
+func (repo *ProductRepository) FindAll(name string) ([]models.Product, error) {
+	query := "SELECT id, name, price, stock, category_id FROM products"
 
-	rows, err := repo.db.Query(query)
+	var args []interface{}
+	if name != "" {
+		query += " WHERE name ILIKE $1"
+		args = append(args, "%"+name+"%")
+	}
+
+	query += " ORDER BY created_at DESC"
+
+	rows, err := repo.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

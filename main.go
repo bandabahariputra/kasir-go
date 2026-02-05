@@ -43,16 +43,23 @@ func main() {
 
 	categoryRepo := repositories.NewCategoryRepository(db)
 	productRepo := repositories.NewProductRepository(db)
+	transactionRepo := repositories.NewTransactionRepository(db)
+
 	categoryService := services.NewCategoryService(categoryRepo, productRepo)
 	productService := services.NewProductService(productRepo, categoryRepo)
+	transactionService := services.NewTransactionService(transactionRepo)
+
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	productHandler := handlers.NewProductHandler(productService)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	http.HandleFunc("/api/categories/", categoryHandler.HandleCategoryByID)
 	http.HandleFunc("/api/categories", categoryHandler.HandleCategories)
 
 	http.HandleFunc("/api/products/", productHandler.HandleProductByID)
 	http.HandleFunc("/api/products", productHandler.HandleProducts)
+
+	http.HandleFunc("/api/checkout", transactionHandler.Checkout)
 
 	// GET http://localhost:8080/health
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
