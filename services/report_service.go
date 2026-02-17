@@ -26,19 +26,64 @@ func (s *ReportService) GetTodayReport() (*models.TodayReport, error) {
 		return nil, err
 	}
 
-	var productName string
-	var productQuantitySold int
-	productName, productQuantitySold, err = s.repo.GetBestSellingProductByPeriod(start, end)
+	productName, productQuantitySold, err := s.repo.GetBestSellingProductByPeriod(start, end)
 	if err != nil {
 		return nil, err
 	}
 
-	return &models.TodayReport{
-		TotalRevenue:     totalRevenue,
-		TotalTransaction: totalTransaction,
-		BestSellingProduct: &models.BestSellingProduct{
+	var bestProduct *models.BestSellingProduct
+	if productName != "" || productQuantitySold > 0 {
+		bestProduct = &models.BestSellingProduct{
 			Name:         productName,
 			QuantitySold: productQuantitySold,
-		},
-	}, err
+		}
+	}
+
+	return &models.TodayReport{
+		TotalRevenue:       totalRevenue,
+		TotalTransaction:   totalTransaction,
+		BestSellingProduct: bestProduct,
+	}, nil
+}
+
+func (s *ReportService) GetReport(startDate, endDate *time.Time) (*models.TodayReport, error) {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+
+	var start time.Time
+	if startDate != nil {
+		start = startDate.In(loc)
+	} else {
+		start = time.Date(2026, time.January, 1, 0, 0, 0, 0, loc)
+	}
+
+	var end time.Time
+	if endDate != nil {
+		end = endDate.In(loc)
+	} else {
+		end = time.Now().In(loc)
+	}
+
+	totalRevenue, totalTransaction, err := s.repo.GetSummaryByPeriod(start, end)
+	if err != nil {
+		return nil, err
+	}
+
+	productName, productQuantitySold, err := s.repo.GetBestSellingProductByPeriod(start, end)
+	if err != nil {
+		return nil, err
+	}
+
+	var bestProduct *models.BestSellingProduct
+	if productName != "" || productQuantitySold > 0 {
+		bestProduct = &models.BestSellingProduct{
+			Name:         productName,
+			QuantitySold: productQuantitySold,
+		}
+	}
+
+	return &models.TodayReport{
+		TotalRevenue:       totalRevenue,
+		TotalTransaction:   totalTransaction,
+		BestSellingProduct: bestProduct,
+	}, nil
 }

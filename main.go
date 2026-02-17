@@ -64,6 +64,7 @@ func main() {
 	http.HandleFunc("/api/checkout", transactionHandler.Checkout)
 
 	http.HandleFunc("/api/report/today", reportHandler.GetTodayReport)
+	http.HandleFunc("/api/report", reportHandler.GetReport)
 
 	// GET http://localhost:8080/health
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
