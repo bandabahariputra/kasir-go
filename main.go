@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kasir-go/database"
 	"kasir-go/handlers"
+	"kasir-go/middlewares"
 	"kasir-go/repositories"
 	"kasir-go/services"
 	"log"
@@ -18,6 +19,7 @@ import (
 type Config struct {
 	Port   string `mapstructure:"PORT"`
 	DBConn string `mapstructure:"DB_CONN"`
+	APIKey string `mapstructure:"API_KEY"`
 }
 
 func main() {
@@ -32,6 +34,7 @@ func main() {
 	config := Config{
 		Port:   viper.GetString("PORT"),
 		DBConn: viper.GetString("DB_CONN"),
+		APIKey: viper.GetString("API_KEY"),
 	}
 
 	// setup database
@@ -40,6 +43,8 @@ func main() {
 		log.Fatal("Failed to initialize database:", err)
 	}
 	defer db.Close()
+
+	apiKeyMiddleware := middlewares.APIKey(config.APIKey)
 
 	categoryRepo := repositories.NewCategoryRepository(db)
 	productRepo := repositories.NewProductRepository(db)
@@ -55,16 +60,16 @@ func main() {
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
 	reportHandler := handlers.NewReportHandler(reportService)
 
-	http.HandleFunc("/api/categories/", categoryHandler.HandleCategoryByID)
-	http.HandleFunc("/api/categories", categoryHandler.HandleCategories)
+	http.HandleFunc("/api/categories/", middlewares.CORS(middlewares.Logger(apiKeyMiddleware(categoryHandler.HandleCategoryByID))))
+	http.HandleFunc("/api/categories", middlewares.CORS(middlewares.Logger(apiKeyMiddleware(categoryHandler.HandleCategories))))
 
-	http.HandleFunc("/api/products/", productHandler.HandleProductByID)
-	http.HandleFunc("/api/products", productHandler.HandleProducts)
+	http.HandleFunc("/api/products/", middlewares.CORS(middlewares.Logger(apiKeyMiddleware(productHandler.HandleProductByID))))
+	http.HandleFunc("/api/products", middlewares.CORS(middlewares.Logger(apiKeyMiddleware(productHandler.HandleProducts))))
 
-	http.HandleFunc("/api/checkout", transactionHandler.Checkout)
+	http.HandleFunc("/api/checkout", middlewares.CORS(middlewares.Logger(apiKeyMiddleware(transactionHandler.Checkout))))
 
-	http.HandleFunc("/api/report/today", reportHandler.GetTodayReport)
-	http.HandleFunc("/api/report", reportHandler.GetReport)
+	http.HandleFunc("/api/report/today", middlewares.CORS(middlewares.Logger(apiKeyMiddleware(reportHandler.GetTodayReport))))
+	http.HandleFunc("/api/report", middlewares.CORS(middlewares.Logger(apiKeyMiddleware(reportHandler.GetReport))))
 
 	// GET http://localhost:8080/health
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
