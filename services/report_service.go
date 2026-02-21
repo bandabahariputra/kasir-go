@@ -51,14 +51,16 @@ func (s *ReportService) GetReport(startDate, endDate *time.Time) (*models.TodayR
 
 	var start time.Time
 	if startDate != nil {
-		start = startDate.In(loc)
+		sd := startDate.In(loc)
+		start = time.Date(sd.Year(), sd.Month(), sd.Day(), 0, 0, 0, 0, loc)
 	} else {
 		start = time.Date(2026, time.January, 1, 0, 0, 0, 0, loc)
 	}
 
 	var end time.Time
 	if endDate != nil {
-		end = endDate.In(loc)
+		ed := endDate.In(loc)
+		end = time.Date(ed.Year(), ed.Month(), ed.Day(), 23, 59, 59, 0, loc)
 	} else {
 		end = time.Now().In(loc)
 	}
