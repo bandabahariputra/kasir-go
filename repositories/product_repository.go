@@ -106,11 +106,11 @@ func (repo *ProductRepository) Delete(id int) error {
 		return fmt.Errorf("product not found")
 	}
 
-	return err
+	return nil
 }
 
 func (repo *ProductRepository) FindByCategoryId(categoryId int) ([]models.Product, error) {
-	query := "SELECT id, name, price, stock FROM products where category_id = $1"
+	query := "SELECT id, name, price, stock, category_id FROM products WHERE category_id = $1"
 
 	rows, err := repo.db.Query(query, categoryId)
 	if err != nil {

@@ -44,6 +44,14 @@ func (repo *TransactionRepository) CreateTransaction(items []models.CheckoutItem
 			return nil, err
 		}
 
+		if item.Quantity <= 0 {
+			return nil, fmt.Errorf("quantity must be greater than 0 for product id %d", item.ProductID)
+		}
+
+		if stock < item.Quantity {
+			return nil, fmt.Errorf("insufficient stock for product %s (available: %d, requested: %d)", productName, stock, item.Quantity)
+		}
+
 		subtotal := item.Quantity * price
 		totalAmount += subtotal
 
